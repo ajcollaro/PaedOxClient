@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="PaedOx.Contracts/PaedOx.Contracts.csproj" />
+  <Project Path="PaedOx.Public/PaedOx.Public.csproj" />
+</Solution>
