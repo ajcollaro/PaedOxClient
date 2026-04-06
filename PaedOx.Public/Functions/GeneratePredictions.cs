@@ -13,7 +13,7 @@ internal static class GeneratePredictions
         var writePath = Console.ReadLine() ?? string.Empty;
         StreamWriter writer = new(Path.Combine(writePath!, "PaedOx_processed.txt"));
 
-        Console.WriteLine("\nYou may apply a Sleep Stager for filtering of Wake.");
+        Console.WriteLine("Select a Sleep Stager to remove periods of Wake?");
         Console.WriteLine("\t0. No,");
         Console.WriteLine("\t1. Yes.");
         _ = int.TryParse(Console.ReadLine(), out var selection);

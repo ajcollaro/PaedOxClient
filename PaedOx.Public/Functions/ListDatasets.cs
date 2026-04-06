@@ -8,8 +8,8 @@ internal static class ListDatasets
     public static async Task List(IDatasets client)
     {
         Console.WriteLine("\nEnter a dataset type:");
-        Console.WriteLine("\t0. Sleep Disordered Breathing,");
-        Console.WriteLine("\t1. Sleep Stager,");
+        Console.WriteLine("\t0. Sleep-Disordered Breathing,");
+        Console.WriteLine("\t1. Sleep Staging,");
         Console.WriteLine("\t2. Return to main menu.");
         _ = int.TryParse(Console.ReadLine(), out var selection);
 
