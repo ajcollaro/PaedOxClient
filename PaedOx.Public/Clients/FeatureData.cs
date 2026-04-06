@@ -1,7 +1,7 @@
-﻿using PaedOx.Contracts.FeatureData;
+﻿using System.Net.Http.Json;
+using PaedOx.Contracts.FeatureData;
 using PaedOx.Contracts.Oximetry;
 using PaedOx.Public.Interfaces;
-using System.Net.Http.Json;
 
 namespace PaedOx.Public.Clients;
 
@@ -9,15 +9,17 @@ internal sealed class FeatureData(HttpClient http) : IFeatureData
 {
     private readonly HttpClient _http = http;
 
-    public async Task<FeatureDataDto> Post(OximetryDto Dto, CancellationToken Token = default)
+    public async Task<FeatureDataDto> Post(OximetryDto dto, CancellationToken token = default)
     {
-        using var Response = await _http.PostAsJsonAsync("/api/v1/featuredata", Dto, Token);
+        using var response = await _http.PostAsJsonAsync("/api/v1/featuredata", dto, token);
 
-        if (!Response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode)
         {
-            Console.WriteLine($"Feature generation failed ({(int)Response.StatusCode})");
+            Console.WriteLine($"Feature generation failed ({(int)response.StatusCode})");
         }
 
-        return (await Response.Content.ReadFromJsonAsync<FeatureDataDto>(cancellationToken: Token))!;
+        return (
+            await response.Content.ReadFromJsonAsync<FeatureDataDto>(cancellationToken: token)
+        )!;
     }
 }

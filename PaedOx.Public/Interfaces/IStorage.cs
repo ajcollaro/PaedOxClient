@@ -4,7 +4,5 @@ namespace PaedOx.Public.Interfaces;
 
 public interface IStorage
 {
-    Task<StorageDto> Post(
-        StorageDto Dto,
-        CancellationToken Token = default);
+    Task<StorageDto> Post(StorageDto dto, CancellationToken token = default);
 }

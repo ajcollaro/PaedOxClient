@@ -5,56 +5,56 @@ namespace PaedOx.Public.Functions;
 
 internal static class GeneratePredictions
 {
-    public static async Task FromUnstructured(IAnalysis Client)
+    public static async Task FromUnstructured(IAnalysis client)
     {
         Console.Write("Enter path to data: ");
-        var DataPath = Console.ReadLine() ?? string.Empty;
+        var dataPath = Console.ReadLine() ?? string.Empty;
         Console.Write("Enter path to write prediction data: ");
-        var WritePath = Console.ReadLine() ?? string.Empty;
-        StreamWriter Writer = new(Path.Combine(WritePath!, "PaedOx_processed.txt"));
+        var writePath = Console.ReadLine() ?? string.Empty;
+        StreamWriter writer = new(Path.Combine(writePath!, "PaedOx_processed.txt"));
 
         Console.WriteLine("\nYou may apply a Sleep Stager for filtering of Wake.");
         Console.WriteLine("\t0. No,");
         Console.WriteLine("\t1. Yes.");
-        _ = int.TryParse(Console.ReadLine(), out var Selection);
+        _ = int.TryParse(Console.ReadLine(), out var selection);
 
-        var SleepStager = string.Empty;
+        var sleepStager = string.Empty;
 
-        switch (Selection)
+        switch (selection)
         {
             case 0:
                 Console.WriteLine("Sleep staging disabled.");
+
                 break;
             case 1:
                 Console.Write("Enter the name of the Sleep Stager: ");
-                SleepStager = Console.ReadLine() ?? string.Empty;
+                sleepStager = Console.ReadLine() ?? string.Empty;
+
                 break;
             default:
                 Console.WriteLine("Invalid selection, returning to main menu.");
+
                 return;
         }
 
         Console.Write("Enter the name of the predictive model: ");
-        var PredictiveModel = Console.ReadLine() ?? string.Empty;
+        var predictiveModel = Console.ReadLine() ?? string.Empty;
 
-        var Data = Directory.GetFiles(DataPath);
-        await Writer.WriteLineAsync($"Recording,Prediction");
+        var data = Directory.GetFiles(dataPath);
+        await writer.WriteLineAsync($"Recording,Prediction");
 
-        for (var i = 0; i < Data.Length; i++)
+        for (var i = 0; i < data.Length; i++)
         {
-            var RecordingName = Path.GetFileName(Data[i]);
-            var RecordingData = await File.ReadAllTextAsync(Data[i]);
+            var recordingName = Path.GetFileName(data[i]);
+            var recordingData = await File.ReadAllTextAsync(data[i]);
 
-            var Dto = new OximetryDto(
-                RecordingData,
-                PredictiveModel,
-                SleepStager);
-            var Result = await Client.Post(Dto);
+            var dto = new OximetryDto(recordingData, predictiveModel, sleepStager);
+            var Result = await client.Post(dto);
 
-            Console.WriteLine($"Received prediction data for recording {RecordingName}...");
-            await Writer.WriteLineAsync($"{RecordingName},{Math.Round(Result.Score, 2)}");
+            Console.WriteLine($"Received prediction data for recording {recordingName}...");
+            await writer.WriteLineAsync($"{recordingName},{Math.Round(Result.Score, 2)}");
         }
 
-        Writer.Close();
+        writer.Close();
     }
 }

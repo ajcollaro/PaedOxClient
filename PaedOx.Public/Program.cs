@@ -9,30 +9,29 @@ class Program
 {
     static async Task Main()
     {
-        var Config = new ConfigurationBuilder()
+        var config = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .Build();
-        var apiSettings = Config
-            .GetSection("Api")
-            .Get<ApiSettings>() ?? new ApiSettings();
+        var apiSettings = config.GetSection("Api").Get<ApiSettings>() ?? new ApiSettings();
 
         Console.WriteLine("PaedOx");
         Console.WriteLine($"Selected Server: {apiSettings.BaseAddress}");
         Console.WriteLine("Server selection may be manually configured in 'appsettings.json'.");
 
-        void ConfigureClient(HttpClient Client) => Client.BaseAddress = new Uri(apiSettings.BaseAddress);
-        var Services = new ServiceCollection();
-        Services.AddHttpClient<IAnalysis, Analysis>(ConfigureClient);
-        Services.AddHttpClient<IDatasets, Datasets>(ConfigureClient);
-        Services.AddHttpClient<IFeatureData, FeatureData>(ConfigureClient);
-        Services.AddHttpClient<IModels, Models>(ConfigureClient);
-        Services.AddHttpClient<IStorage, Storage>(ConfigureClient);
-        var ServiceProvider = Services.BuildServiceProvider();
+        void ConfigureClient(HttpClient client) =>
+            client.BaseAddress = new Uri(apiSettings.BaseAddress);
+        var services = new ServiceCollection();
+        services.AddHttpClient<IAnalysis, Analysis>(ConfigureClient);
+        services.AddHttpClient<IDatasets, Datasets>(ConfigureClient);
+        services.AddHttpClient<IFeatureData, FeatureData>(ConfigureClient);
+        services.AddHttpClient<IModels, Models>(ConfigureClient);
+        services.AddHttpClient<IStorage, Storage>(ConfigureClient);
+        var serviceProvider = services.BuildServiceProvider();
 
-        var Running = true;
+        var running = true;
 
-        while (Running)
+        while (running)
         {
             Console.WriteLine("\nMain Menu:");
             Console.WriteLine("\t0. List datasets,");
@@ -41,33 +40,34 @@ class Program
             Console.WriteLine("\t3. Generate training data,");
             Console.WriteLine("\t4. Generate predictions.");
             Console.Write("Select an option: ");
-            _ = int.TryParse(Console.ReadLine(), out var Selection);
+            _ = int.TryParse(Console.ReadLine(), out var selection);
 
-            switch (Selection)
+            switch (selection)
             {
                 case 0:
-                    var DatasetClient = ServiceProvider.GetRequiredService<IDatasets>();
-                    await ListDatasets.List(DatasetClient);
+                    var datasetClient = serviceProvider.GetRequiredService<IDatasets>();
+                    await ListDatasets.List(datasetClient);
 
                     break;
                 case 1:
-                    var ModelClient = ServiceProvider.GetRequiredService<IModels>();
-                    await ListModels.List(ModelClient);
+                    var modelClient = serviceProvider.GetRequiredService<IModels>();
+                    await ListModels.List(modelClient);
 
                     break;
                 case 2:
-                    var StorageClient = ServiceProvider.GetRequiredService<IStorage>();
-                    await ManageStorage.Manage(StorageClient);
+                    var storageClient = serviceProvider.GetRequiredService<IStorage>();
+                    await ManageStorage.Manage(storageClient);
 
                     break;
                 case 3:
-                    var FeatureGenerationClient = ServiceProvider.GetRequiredService<IFeatureData>();
-                    await GenerateFeatureData.FromUnstructured(FeatureGenerationClient);
+                    var featureGenerationClient =
+                        serviceProvider.GetRequiredService<IFeatureData>();
+                    await GenerateFeatureData.FromUnstructured(featureGenerationClient);
 
                     break;
                 case 4:
-                    var AnalysisClient = ServiceProvider.GetRequiredService<IAnalysis>();
-                    await GeneratePredictions.FromUnstructured(AnalysisClient);
+                    var analysisClient = serviceProvider.GetRequiredService<IAnalysis>();
+                    await GeneratePredictions.FromUnstructured(analysisClient);
 
                     break;
                 default:

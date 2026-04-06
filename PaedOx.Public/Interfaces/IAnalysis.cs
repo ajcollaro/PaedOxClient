@@ -5,7 +5,5 @@ namespace PaedOx.Public.Interfaces;
 
 public interface IAnalysis
 {
-    Task<AnalysisDto> Post(
-        OximetryDto Dto,
-        CancellationToken Token = default);
+    Task<AnalysisDto> Post(OximetryDto dto, CancellationToken token = default);
 }

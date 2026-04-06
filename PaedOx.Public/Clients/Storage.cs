@@ -1,6 +1,6 @@
-﻿using PaedOx.Contracts.Storage;
+﻿using System.Net.Http.Json;
+using PaedOx.Contracts.Storage;
 using PaedOx.Public.Interfaces;
-using System.Net.Http.Json;
 
 namespace PaedOx.Public.Clients;
 
@@ -8,15 +8,15 @@ internal sealed class Storage(HttpClient http) : IStorage
 {
     private readonly HttpClient _http = http;
 
-    public async Task<StorageDto> Post(StorageDto Dto, CancellationToken Token = default)
+    public async Task<StorageDto> Post(StorageDto dto, CancellationToken token = default)
     {
-        using var Response = await _http.PostAsJsonAsync("/api/v1/storage", Dto, Token);
+        using var response = await _http.PostAsJsonAsync("/api/v1/storage", dto, token);
 
-        if (!Response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode)
         {
-            Console.WriteLine($"Storage operation failed ({(int)Response.StatusCode})");
+            Console.WriteLine($"Storage operation failed ({(int)response.StatusCode})");
         }
 
-        return (await Response.Content.ReadFromJsonAsync<StorageDto>(cancellationToken: Token))!;
+        return (await response.Content.ReadFromJsonAsync<StorageDto>(cancellationToken: token))!;
     }
 }

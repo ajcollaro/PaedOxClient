@@ -1,6 +1,6 @@
-﻿using PaedOx.Contracts.Datasets;
+﻿using System.Net.Http.Json;
+using PaedOx.Contracts.Datasets;
 using PaedOx.Public.Interfaces;
-using System.Net.Http.Json;
 
 namespace PaedOx.Public.Clients;
 
@@ -8,15 +8,15 @@ internal sealed class Datasets(HttpClient http) : IDatasets
 {
     private readonly HttpClient _http = http;
 
-    public async Task<DatasetsDto> Post(DatasetsDto Dto, CancellationToken Token = default)
+    public async Task<DatasetsDto> Post(DatasetsDto dto, CancellationToken token = default)
     {
-        using var Response = await _http.PostAsJsonAsync("/api/v1/datasets", Dto, Token);
+        using var response = await _http.PostAsJsonAsync("/api/v1/datasets", dto, token);
 
-        if (!Response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode)
         {
-            Console.WriteLine($"Dataset list generation failed ({(int)Response.StatusCode})");
+            Console.WriteLine($"Dataset list generation failed ({(int)response.StatusCode})");
         }
 
-        return (await Response.Content.ReadFromJsonAsync<DatasetsDto>(cancellationToken: Token))!;
+        return (await response.Content.ReadFromJsonAsync<DatasetsDto>(cancellationToken: token))!;
     }
 }

@@ -1,87 +1,93 @@
-﻿using PaedOx.Contracts.Datasets;
+﻿using System.Text.Json;
+using PaedOx.Contracts.Datasets;
 using PaedOx.Contracts.Oximetry;
 using PaedOx.Public.Interfaces;
-using System.Text.Json;
 
 namespace PaedOx.Public.Functions;
 
 internal static class GenerateFeatureData
 {
-    public static async Task FromUnstructured(IFeatureData Client)
+    public static async Task FromUnstructured(IFeatureData client)
     {
-        Console.WriteLine("\nOximetry data and labels must be stored separately with identical (paired) naming.");
+        Console.WriteLine(
+            "\nOximetry data and labels must be stored separately with identical (paired) naming."
+        );
         Console.Write("Enter path to training data: ");
-        var DataPath = Console.ReadLine() ?? string.Empty;
+        var dataPath = Console.ReadLine() ?? string.Empty;
         Console.Write("Enter path to labels: ");
-        var LabelPath = Console.ReadLine() ?? string.Empty;
+        var labelPath = Console.ReadLine() ?? string.Empty;
         Console.Write("Enter path to write feature data: ");
-        var WritePath = Console.ReadLine() ?? string.Empty;
+        var writePath = Console.ReadLine() ?? string.Empty;
 
-        Console.WriteLine("\nYou may apply a Sleep Stager for filtering of probable Wake.");
+        // API currently requires a saved model as an input.
+        // The selected model does not change training data generation.
+        // To be resolved in a future API update.
+        Console.Write("\nEnter name of predictive model: ");
+        var model = Console.ReadLine() ?? string.Empty;
+
+        Console.WriteLine("Select a Sleep Stager to remove periods of Wake?");
         Console.WriteLine("\t0. No,");
         Console.WriteLine("\t1. Yes.");
-        _ = int.TryParse(Console.ReadLine(), out var Selection);
+        _ = int.TryParse(Console.ReadLine(), out var selection);
 
-        var SleepStager = string.Empty;
+        var sleepStager = string.Empty;
 
-        switch (Selection)
+        switch (selection)
         {
             case 0:
                 Console.WriteLine("Sleep staging disabled.");
+
                 break;
             case 1:
                 Console.Write("Enter the name of the Sleep Stager: ");
-                SleepStager = Console.ReadLine() ?? string.Empty;
+                sleepStager = Console.ReadLine() ?? string.Empty;
+
                 break;
             default:
                 Console.WriteLine("Invalid selection, returning to main menu.");
+
                 return;
         }
 
-        var Data = Directory.GetFiles(DataPath);
-        var Labels = Directory.GetFiles(LabelPath);
+        var data = Directory.GetFiles(dataPath);
+        var labels = Directory.GetFiles(labelPath);
 
-        List<List<double>> DataX = [];
-        List<double> DataYClassification = [];
-        List<double> DataYRegression = [];
+        List<List<double>> dataX = [];
+        List<double> dataYClassification = [];
+        List<double> dataYRegression = [];
 
-        for (var i = 0; i < Data.Length; i++)
+        for (var i = 0; i < data.Length; i++)
         {
-            var RecordingName = Path.GetFileName(Data[i]);
-            var RecordingData = await File.ReadAllTextAsync(Data[i]);
-            var RecordingLabel = await File.ReadAllTextAsync(Labels[i]);
+            var recordingName = Path.GetFileName(data[i]);
+            var recordingData = await File.ReadAllTextAsync(data[i]);
+            var recordingLabel = await File.ReadAllTextAsync(labels[i]);
 
-            var Dto = new OximetryDto(
-                RecordingData,
-                string.Empty,
-                SleepStager);
-            var Result = await Client.Post(Dto);
+            var dto = new OximetryDto(recordingData, model, sleepStager);
+            var result = await client.Post(dto);
 
-            if (Result.Value is not null)
+            if (result.Value is not null)
             {
-                Console.WriteLine($"Received feature data for recording {RecordingName}...");
+                Console.WriteLine($"Received feature data for recording {recordingName}...");
             }
             else
             {
-                Console.WriteLine($"No feature data for recording {RecordingName}, skipping...");
+                Console.WriteLine($"No feature data for recording {recordingName}, skipping...");
+
                 continue;
             }
 
-            _ = double.TryParse(RecordingLabel, out var Label);
+            _ = double.TryParse(recordingLabel, out var label);
 
-            DataX.Add(Result.Value);
-            DataYClassification.Add(Label >= 5 ? +1 : -1);
-            DataYRegression.Add(Label);
+            dataX.Add(result.Value);
+            dataYClassification.Add(label >= 5 ? +1 : -1);
+            dataYRegression.Add(label);
         }
 
-        DatasetDto Dataset = new(DataX, DataYClassification, DataYRegression);
+        DatasetDto dataset = new(dataX, dataYClassification, dataYRegression);
 
-        var Options = new JsonSerializerOptions
-        {
-            WriteIndented = true
-        };
+        var Options = new JsonSerializerOptions { WriteIndented = true };
 
-        var DatasetData = JsonSerializer.Serialize(Dataset, Options);
-        await File.WriteAllTextAsync(Path.Combine(WritePath!, "Dataset.json"), DatasetData);
+        var datasetData = JsonSerializer.Serialize(dataset, Options);
+        await File.WriteAllTextAsync(Path.Combine(writePath!, "Dataset.json"), datasetData);
     }
 }

@@ -5,7 +5,5 @@ namespace PaedOx.Public.Interfaces;
 
 public interface IFeatureData
 {
-    Task<FeatureDataDto> Post(
-        OximetryDto Dto,
-        CancellationToken Token = default);
+    Task<FeatureDataDto> Post(OximetryDto dto, CancellationToken token = default);
 }

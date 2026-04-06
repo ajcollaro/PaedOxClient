@@ -5,22 +5,22 @@ namespace PaedOx.Public.Functions;
 
 internal static class ManageStorage
 {
-    public static async Task Manage(IStorage Client)
+    public static async Task Manage(IStorage client)
     {
         Console.WriteLine("\nSelect from the following storage operations:");
         Console.WriteLine("\t0. Reload saved datasets,");
         Console.WriteLine("\t1. Reload saved models,");
         Console.WriteLine("\t2. Delete a model,");
         Console.WriteLine("\t3. Return to main menu.");
-        _ = int.TryParse(Console.ReadLine(), out var Selection);
+        _ = int.TryParse(Console.ReadLine(), out var selection);
 
-        switch (Selection)
+        switch (selection)
         {
             case 0 or 1:
-                var Dto = new StorageDto(string.Empty, Selection, 0);
-                var Result = await Client.Post(Dto);
+                var dto = new StorageDto(string.Empty, selection, 0);
+                var result = await client.Post(dto);
 
-                if (Result.Response == 0)
+                if (result.Response == 0)
                 {
                     Console.WriteLine("Reload successful.");
                 }
@@ -32,15 +32,15 @@ internal static class ManageStorage
                 return;
             case 2:
                 Console.Write("Enter the name of the model to delete: ");
-                var Model = Console.ReadLine() ?? string.Empty;
-                var Dto2 = new StorageDto(Model, Selection, 0);
-                var Result2 = await Client.Post(Dto2);
+                var model = Console.ReadLine() ?? string.Empty;
+                var dto2 = new StorageDto(model, selection, 0);
+                var result2 = await client.Post(dto2);
 
                 // Refresh after deletion.
-                var Dto3 = new StorageDto(string.Empty, 0, 0);
-                var Result3 = await Client.Post(Dto3);
+                var dto3 = new StorageDto(string.Empty, 0, 0);
+                var result3 = await client.Post(dto3);
 
-                if (Result2.Response == 0 && Result3.Response == 0)
+                if (result2.Response == 0 && result3.Response == 0)
                 {
                     Console.WriteLine("Deletion successful.");
                 }
@@ -54,6 +54,7 @@ internal static class ManageStorage
                 return;
             default:
                 Console.WriteLine("Invalid selection, returning to main menu.");
+
                 return;
         }
     }

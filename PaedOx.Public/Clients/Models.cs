@@ -1,6 +1,6 @@
-﻿using PaedOx.Contracts.Models;
+﻿using System.Net.Http.Json;
+using PaedOx.Contracts.Models;
 using PaedOx.Public.Interfaces;
-using System.Net.Http.Json;
 
 namespace PaedOx.Public.Clients;
 
@@ -8,15 +8,15 @@ internal sealed class Models(HttpClient http) : IModels
 {
     private readonly HttpClient _http = http;
 
-    public async Task<ModelsDto> Post(ModelsDto Dto, CancellationToken Token = default)
+    public async Task<ModelsDto> Post(ModelsDto dto, CancellationToken token = default)
     {
-        using var Response = await _http.PostAsJsonAsync("/api/v1/models", Dto, Token);
+        using var response = await _http.PostAsJsonAsync("/api/v1/models", dto, token);
 
-        if (!Response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode)
         {
-            Console.WriteLine($"Model list generation failed ({(int)Response.StatusCode})");
+            Console.WriteLine($"Model list generation failed ({(int)response.StatusCode})");
         }
 
-        return (await Response.Content.ReadFromJsonAsync<ModelsDto>(cancellationToken: Token))!;
+        return (await response.Content.ReadFromJsonAsync<ModelsDto>(cancellationToken: token))!;
     }
 }
