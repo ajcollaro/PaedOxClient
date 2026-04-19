@@ -1,1 +1,1 @@
-Reference client to demonstrating interaction with the [PaedOx](https://www.paedox.com) API.
+Reference client demonstrating interaction with the [PaedOx](https://www.paedox.com) API.
